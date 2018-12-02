@@ -1,0 +1,43 @@
+no_rows=dff_train.shape[0]
+# no_rows=train.shape[0]
+
+def dl(hid=[100, 50, 2],hid_drp=[0.5, 0.5, 0.35],ep=1,it=0.01):
+    hidden=hid
+    dl_model = H2ODeepLearningEstimator(model_id='[1]'
+                                        ,epochs=ep
+                                        # ,nfolds=5
+                                        ,standardize=True
+                                        # ,variable_importances=True
+                                        # reproducible=True
+                                        ,seed=12345
+                                        # ,sparse=True
+                                        # ,balance_classes=True
+                                        ,activation= "rectifierwithdropout"# "maxoutwithdropout" #"tanhwithdropout"#"maxoutwithdropout" # "tanhwithdropout"#    "tanhwithdropout"#"Rectifier"  #"Tanh"
+                                        ,max_w2=10.0
+                                        ,hidden_dropout_ratios=hid_drp
+                                        ,l1=1e-6
+                                        ,l2=1e-6
+                                        ,use_all_factor_levels=True
+                                        # ,autoencoder=True
+                                        ,hidden=hidden
+                                        ,ignore_const_cols=False
+                                        # , stopping_rounds=20
+                                        #  ,stopping_tolerance=10e-20
+                                        , stopping_metric= "AUC" # "logloss" # "AUC" #"Missclassification"
+                                         # deviance logloss mse rmse mae rmsle auc lift_top_group misclassification mean_per_class_error
+                                         #####################################################################
+                                         ################################# Controlling the scoring epochs
+                                         , score_interval=0
+                                         , score_duty_cycle=1
+                                         , shuffle_training_data=False  # Recommended True, but False gives better deviance
+                                         , replicate_training_data=True
+                                         , train_samples_per_iteration=int(it*(no_rows)/2)
+                                         ####################################################################
+                                        # ,score_interval=it
+                                        # , score_duty_cycle=it
+                                        ,categorical_encoding= "eigen" #"label_encoder" #'AUTO' # #"label_encoder" #"sort_by_response"
+                                        )
+    dl_model.train(x=predictors, y=response, training_frame= train, validation_frame=valid)
+    return dl_model
+    
+    dlh = dl([100, 50, 2], [0.5, 0.5, 0.35], 1, 0.1)
